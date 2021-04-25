@@ -16,6 +16,8 @@ randSeed = 1
 convergenceVal = 100000
 
 
+bestChoicesArray = []
+
 class Square:
     def __init__(self, squareType,qVal,reward,index):
         self.type = squareType
@@ -91,12 +93,16 @@ def chooseNextState(Square square):
 
     if maxVal==rightVal:
         bestState = boardArray[square.index+1]
+        bestChoicesArray.append("right")
     else if maxVal==leftVal:
         bestState = boardArray[square.index-1]
+        bestChoicesArray.append("left")
     else if maxVal==upVal:
         bestState = boardArray[square.index+4]
+        bestChoicesArray.append("up")
     else if maxVal==downVal:
         bestState = boardArray[square.index-4]
+        bestChoicesArray.append("down")
 
     if  np.random.random() < epsilonGreedy:
         return bestState
@@ -116,6 +122,24 @@ def chooseNextState(Square square):
 
 
 def updateQVal (Square state):
+    print("current q val = ",state.qVal)
     newQVal = chooseNextState (state).qVal
     tempQval = ((1-learnRate) * state.qVal) + learnRate[state.reward + discountRate *newQVal]
     state.qVal = tempQval
+    print("new q val = ",state.qVal)
+
+
+
+#set q values
+for i in range 0,100000,1:
+    for i in range (0,16,1):
+        updateQVal(boardArray[i])
+    
+    
+
+
+#for i in range 1,17,1:
+#    print(i, " " ,bestChoicesArray[i])
+
+
+
