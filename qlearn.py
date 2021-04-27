@@ -74,15 +74,15 @@ for i in range (0,16,1):
 
 
 
-def isTerminalState (Square square):
+def isTerminalState (square):
     if square.reward == 100:
         return True
-    else if square.reward == -100:
+    elif square.reward == -100:
         return True
     else:
         return False
 
-def chooseNextState(Square square):
+def chooseNextState(square):
     rightVal = boardArray[square.index+1].qVal
     leftVal = boardArray[square.index-1].qVal
     upVal = boardArray[square.index+4].qVal
@@ -94,13 +94,13 @@ def chooseNextState(Square square):
     if maxVal==rightVal:
         bestState = boardArray[square.index+1]
         bestChoicesArray.append("right")
-    else if maxVal==leftVal:
+    elif maxVal==leftVal:
         bestState = boardArray[square.index-1]
         bestChoicesArray.append("left")
-    else if maxVal==upVal:
+    elif maxVal==upVal:
         bestState = boardArray[square.index+4]
         bestChoicesArray.append("up")
-    else if maxVal==downVal:
+    elif maxVal==downVal:
         bestState = boardArray[square.index-4]
         bestChoicesArray.append("down")
 
@@ -108,20 +108,19 @@ def chooseNextState(Square square):
         return bestState
 
     else:
-        switch(np.random.randint(4)){
-            case 0:
-                bestState = boardArray[square.index+1]
-            case 1:
-                bestState = boardArray[square.index-1]  
-            case 2:
-                bestState = boardArray[square.index+4]
-            case 3:
-                bestState = boardArray[square.index-4]
-        }
+        randInt = np.random.randint(4)
+        if randInt == 0:
+            bestState = boardArray[square.index+1]
+        elif randInt == 1:
+            bestState = boardArray[square.index-1]
+        elif randInt == 2:
+            bestState = boardArray[square.index+4]
+        elif randInt == 3:
+            bestState = boardArray[square.index-4]
         return bestState
 
 
-def updateQVal (Square state):
+def updateQVal (state):
     print("current q val = ",state.qVal)
     newQVal = chooseNextState (state).qVal
     tempQval = ((1-learnRate) * state.qVal) + learnRate[state.reward + discountRate *newQVal]
@@ -131,7 +130,7 @@ def updateQVal (Square state):
 
 
 #set q values
-for i in range 0,100000,1:
+for i in range (0,100000,1):
     for i in range (0,16,1):
         updateQVal(boardArray[i])
     
