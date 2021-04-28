@@ -100,66 +100,67 @@ def chooseNextState(square):
         print("entering rightBorder")
         if square.index in upBorder: #Square 16
             print("entering square 16")
-            downVal = boardArray[square.index-4].qVal
-            leftVal = boardArray[square.index-1].qVal
+            downVal = boardArray[square.index-1-4].qVal
+            leftVal = boardArray[square.index-1-1].qVal
         elif square.index in downBorder:#Square 4
             print("entering square 4")
-            upVal = boardArray[square.index+4].qVal    
-            leftVal = boardArray[square.index-1].qVal
+            upVal = boardArray[square.index-1+4].qVal    
+            leftVal = boardArray[square.index-1-1].qVal
         else:#Any square right NOT 16/4
             print("entering other squares")
-            upVal = boardArray[square.index+4].qVal    
-            downVal = boardArray[square.index-4].qVal
-            leftVal = boardArray[square.index-1].qVal
+            print("board length is:",len(boardArray))
+            upVal = boardArray[square.index-1+4].qVal    
+            downVal = boardArray[square.index-1-4].qVal
+            leftVal = boardArray[square.index-1-1].qVal
 
     if ((int)(square.index) in leftBorder):
         print("entering leftBorder")
         if square.index in upBorder: #Square 13
             print("entering square 13")
-            downVal = boardArray[square.index-4].qVal
-            rightVal = boardArray[square.index+1].qVal
+            downVal = boardArray[square.index-1-4].qVal
+            rightVal = boardArray[square.index-1+1].qVal
         elif square.index in downBorder: #Square 1
             print("entering square 1")
-            upVal = boardArray[square.index+4].qVal    
-            rightVal = boardArray[square.index+1].qVal
+            upVal = boardArray[square.index-1+4].qVal    
+            rightVal = boardArray[square.index-1+1].qVal
         else:#Any square right NOT 13/1
             print("entering other squares")
-            upVal = boardArray[square.index+4].qVal    
-            downVal = boardArray[square.index-4].qVal
-            rightVal = boardArray[square.index+1].qVal
+            upVal = boardArray[square.index-1+4].qVal    
+            downVal = boardArray[square.index-1-4].qVal
+            rightVal = boardArray[square.index-1+1].qVal
 
     if ((int)(square.index) in upBorder):
         print("entering upBorder")
         if square.index in rightBorder: #Square 16
             print("entering square 16")
-            downVal = boardArray[square.index-4].qVal
-            leftVal = boardArray[square.index-1].qVal
+            downVal = boardArray[square.index-1-4].qVal
+            leftVal = boardArray[square.index-1-1].qVal
         elif square.index in leftBorder:#Square 13
             print("entering square 13")
-            downVal = boardArray[square.index-4].qVal
-            rightVal = boardArray[square.index+1].qVal
+            downVal = boardArray[square.index-1-4].qVal
+            rightVal = boardArray[square.index-1+1].qVal
         else:#Any square right NOT 16/13
             print("entering other squares")
-            downVal = boardArray[square.index-4].qVal
-            rightVal = boardArray[square.index+1].qVal
-            leftVal = boardArray[square.index-1].qVal
+            downVal = boardArray[square.index-1-4].qVal
+            rightVal = boardArray[square.index-1+1].qVal
+            leftVal = boardArray[square.index-1-1].qVal
 
         
     if ((int)(square.index) in downBorder):
         print("entering downBorder")
         if square.index in rightBorder: #Square 4
             print("entering square4")
-            upVal = boardArray[square.index+4].qVal
-            leftVal = boardArray[square.index-1].qVal
+            upVal = boardArray[square.index-1+4].qVal
+            leftVal = boardArray[square.index-1-1].qVal
         elif square.index in leftBorder:#Square 1
             print("entering square1")
-            upVal = boardArray[square.index+4].qVal
-            rightVal = boardArray[square.index+1].qVal
+            upVal = boardArray[square.index-1+4].qVal
+            rightVal = boardArray[square.index-1+1].qVal
         else:#Any square right NOT 4/1
             print("entering other squares")
-            upVal = boardArray[square.index+4].qVal
-            rightVal = boardArray[square.index+1].qVal
-            leftVal = boardArray[square.index-1].qVal
+            upVal = boardArray[square.index-1+4].qVal
+            rightVal = boardArray[square.index-1+1].qVal
+            leftVal = boardArray[square.index-1-1].qVal
     
 
     # maxVal = None
@@ -173,16 +174,16 @@ def chooseNextState(square):
     bestState = None 
 
     if maxVal==rightVal:
-        bestState = boardArray[square.index+1]
+        bestState = boardArray[square.index-1+1]
         bestChoicesArray.append("right")
     elif maxVal==leftVal:
-        bestState = boardArray[square.index-1]
+        bestState = boardArray[square.index-1-1]
         bestChoicesArray.append("left")
     elif maxVal==upVal:
-        bestState = boardArray[square.index+4]
+        bestState = boardArray[square.index-1+4]
         bestChoicesArray.append("up")
     elif maxVal==downVal:
-        bestState = boardArray[square.index-4]
+        bestState = boardArray[square.index-1-4]
         bestChoicesArray.append("down")
 
     if  np.random.random() < epsilonGreedy:
@@ -190,14 +191,15 @@ def chooseNextState(square):
 
     else:
         randInt = np.random.randint(4)
+        print("randInt is = ", randInt)
         if randInt == 0:
-            bestState = boardArray[square.index+1]
+            bestState = boardArray[square.index-1+1]
         elif randInt == 1:
-            bestState = boardArray[square.index-1]
+            bestState = boardArray[square.index-1-1]
         elif randInt == 2:
-            bestState = boardArray[square.index+4]
+            bestState = boardArray[square.index-1+4]
         elif randInt == 3:
-            bestState = boardArray[square.index-4]
+            bestState = boardArray[square.index-1-4]
         return bestState
 
 
