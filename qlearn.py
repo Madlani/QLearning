@@ -186,7 +186,7 @@ def chooseNextState(square):
         bestState = boardArray[square.index-1-4]
         bestChoicesArray.append("down")
 
-    if  np.random.random() < epsilonGreedy:
+    if np.random.random() < epsilonGreedy:
         return bestState
 
     else:
