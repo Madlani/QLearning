@@ -1,5 +1,6 @@
 from textwrap import wrap
 import numpy as np
+import random
 
 liveReward = -0.1
 discountRate = 0.1
@@ -190,15 +191,15 @@ def chooseNextState(square):
         return bestState
 
     else:
-        randInt = np.random.randint(4)
+        randInt = random.randint(0,3)
         print("randInt is = ", randInt)
-        if randInt == 0:
+        if ((randInt == 0) and (rightVal > -10)):
             bestState = boardArray[square.index-1+1]
-        elif randInt == 1:
+        elif ((randInt == 1) and (leftVal > -10)):
             bestState = boardArray[square.index-1-1]
-        elif randInt == 2:
+        elif ((randInt == 2) and (upVal > -10)):
             bestState = boardArray[square.index-1+4]
-        elif randInt == 3:
+        elif ((randInt == 3) and (downVal > -10)):
             bestState = boardArray[square.index-1-4]
         return bestState
 
