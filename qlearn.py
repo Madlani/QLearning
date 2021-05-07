@@ -45,10 +45,10 @@ inputAsArrayLen = len(inputAsArray)
 
 #print(inputAsArray)
 
-goalState1Loc = int(inputAsArray[0])
-goalState2Loc = int(inputAsArray[1])
-forbiddenStateLoc = int(inputAsArray[2])
-wallStateLoc = int(inputAsArray[3])
+goalState1Loc = int(inputAsArray[0])-1
+goalState2Loc = int(inputAsArray[1])-1
+forbiddenStateLoc = int(inputAsArray[2])-1
+wallStateLoc = int(inputAsArray[3])-1
 outputFormat = inputAsArray[4]
 
 if (inputAsArrayLen == 6):
@@ -74,6 +74,9 @@ boardArray[wallStateLoc].type = 'W'
 print("Set all starting states")
 for i in range (0,16,1):
     print(boardArray[i].type, "+ ",boardArray[i].reward, boardArray[i].qVal,boardArray[i].index)
+
+
+#ef tiebreak(upval, rightval, downval, leftval):
 
 
 
@@ -173,7 +176,10 @@ def chooseNextState(square,flag):
     #             if downVal != None:
     #                 maxVal = max(rightVal, leftVal, upVal, downVal)
 
-    maxVal = max(rightVal, leftVal, upVal, downVal)
+
+
+
+    maxVal = max(upVal, rightVal, downVal, leftVal)
     bestState = None 
 
     #stateWMove = []
@@ -244,11 +250,11 @@ startState = boardArray[1]
 for i in range (0,iterationCount,1):
     currentState = startState
     while(not atExitState):
-        print("line 246")
+        #print("line 246")
         if iterationCount == 0:
             epsilonGreedy = 0
         currentState = updateQVal(currentState) #start updating from the starting square
-        print("currentState.type = :",currentState.type)
+        #print("currentState.type = :",currentState.type)
         if (currentState.type == ('G' or 'F')):
             atExitState = True
 
@@ -262,14 +268,14 @@ pathArray = []
 pathStart = boardArray[0]
 currState = pathStart
 for i in range (0,16,1):
-    print("not at goal state yet")
-    chosenState = (chooseNextState(currState,'notNecessarilyOptimal'))
+    #print("not at goal state yet")
+    chosenState = (chooseNextState(currState,'optimal'))
     pathArray.append(chosenState[1])
     nextState = chosenState[0]
     if (currState.type == ('G' or 'F')):
             pathAtGoalState = True
-    print("currState.index = :",currState.index)
-    print("currState.type = :",currState.type)
+    #print("currState.index = :",currState.index)
+    #print("currState.type = :",currState.type)
     currState = nextState
 
 pathArray[goalState1Loc] = 'goal'
