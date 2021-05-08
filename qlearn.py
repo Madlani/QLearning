@@ -1,5 +1,4 @@
 from textwrap import wrap
-import numpy as np
 import random
 
 liveReward = -0.1
@@ -154,20 +153,20 @@ def calcQValWithSelf(square, action):
 
     maxQVal = max(stateUpQVal,stateRightQVal,stateDownQVal,stateLeftQVal)
 
-    updatedUpQVal = ((1-learnRate) * state.upQVal) + learnRate*(state.reward + discountRate * maxQVal)
-    updatedRightQVal = ((1-learnRate) * state.rightQVal) + learnRate*(state.reward + discountRate *maxQVal)
-    updatedDownQVal = ((1-learnRate) * state.downQVal) + learnRate*(state.reward + discountRate *maxQVal)
-    updatedLeftQVal = ((1-learnRate) * state.leftQVal) + learnRate*(state.reward + discountRate *maxQVal)
+    updatedUpQVal = ((1-learnRate) * square.upQVal) + learnRate*(square.reward + discountRate * maxQVal)
+    updatedRightQVal = ((1-learnRate) * square.rightQVal) + learnRate*(square.reward + discountRate *maxQVal)
+    updatedDownQVal = ((1-learnRate) * square.downQVal) + learnRate*(square.reward + discountRate *maxQVal)
+    updatedLeftQVal = ((1-learnRate) * square.leftQVal) + learnRate*(square.reward + discountRate *maxQVal)
 
     nextActionPicked = action
     if (nextActionPicked == "up"):
-        state.upQVal = updatedUpQVal
+        square.upQVal = updatedUpQVal
     elif (nextActionPicked == "right"):
-        state.rightQVal = updatedRightQVal
+        square.rightQVal = updatedRightQVal
     elif (nextActionPicked == "down"):
-        state.downQVal = updatedDownQVal
+        square.downQVal = updatedDownQVal
     elif (nextActionPicked == "left"):
-        state.leftQVal = updatedLeftQVal
+        square.leftQVal = updatedLeftQVal
     
 
 
@@ -257,35 +256,40 @@ def chooseNextState(square,flag):
     #         rightVal = square.rightQVal
     #         leftVal = square.leftQVal
     
-    maxVal = max(upVal, rightVal, downVal, leftVal)
+    #maxVal = max(upVal, rightVal, downVal, leftVal)
+    maxVal = max(squareUpVal, squareRightVal, squareDownVal, squareLeftVal)
 
-    if maxVal==upVal:
+    if maxVal==squareUpVal:
         if isValidMove(square, "up"):
             bestState = boardArray[square.index-1+4]
             bestChoice = "up"
         else:
             calcQValWithSelf(square, "up")
+            bestState = square
 
-    elif maxVal==rightVal:
+    elif maxVal==squareRightVal:
         if isValidMove(square, "right"):
             bestState = boardArray[square.index-1+1]
             bestChoice = "right"
         else:
             calcQValWithSelf(square, "right")
+            bestState = square
 
-    elif maxVal==downVal:
+    elif maxVal==squareDownVal:
         if isValidMove(square, "down"):
             bestState = boardArray[square.index-1-4]
             bestChoice = "down"
         else:
             calcQValWithSelf(square, "down")
+            bestState = square
 
-    elif maxVal==leftVal:
+    elif maxVal==squareLeftVal:
         if isValidMove(square, "left"):
             bestState = boardArray[square.index-1-1]
             bestChoice = "left"
         else:
             calcQValWithSelf(square, "left")
+            bestState = square
 
 
     randVal = random.random()
@@ -295,38 +299,30 @@ def chooseNextState(square,flag):
     else:
         #print("DOING RANDOM TINGSSSS")
         randInt = random.randint(0,3)
-        if ((randInt == 0) and (rightVal > -999)):
-            # print("ENTERING RANDINT = 0")
-            bestState = boardArray[square.index-1+1]
-            # if bestState.type == "W":
-            #     #bestState = boardArray[square.index-1]
-            #     bestChoice = "wall-square"
-            # else:
-            bestChoice = "right"
-        elif ((randInt == 1) and (leftVal > -999)):
-            # print("ENTERING RANDINT = 1")
-            bestState = boardArray[square.index-1-1]
-            # if bestState.type == "W":
-            #     #bestState = boardArray[square.index-1]
-            #     bestChoice = "wall-square"
-            # else:
-            bestChoice = "left"
-        elif ((randInt == 2) and (upVal > -999)):
-            # print("ENTERING RANDINT = 2")
-            bestState = boardArray[square.index-1+4]
-            # if bestState.type == "W":
-            #     #bestState = boardArray[square.index-1]
-            #     bestChoice = "wall-square"
-            # else:
-            bestChoice = "up"
-        elif ((randInt == 3) and (downVal > -999)):
-            # print("ENTERING RANDINT = 3")
-            bestState = boardArray[square.index-1-4]
-            # if bestState.type == "W":
-            #     #bestState = boardArray[square.index-1]
-            #     bestChoice = "wall-square"
-            # else:
-            bestChoice = "down"
+        if (randInt == 0):
+            if isValidMove(square,"right"):
+                bestState = boardArray[square.index-1+1]
+                bestChoice = "right"
+            else:
+                bestState = square
+        elif (randInt == 1):
+            if isValidMove(square,"left"):
+                bestState = boardArray[square.index-1-1]
+                bestChoice = "left"
+            else:
+                bestState = square
+        elif (randInt == 2):
+            if isValidMove(square,"up"):
+                bestState = boardArray[square.index-1+4]
+                bestChoice = "up"
+            else:
+                bestState = square
+        elif (randInt == 3):
+            if isValidMove(square,"down"):
+                bestState = boardArray[square.index-1-4]
+                bestChoice = "down"
+            else:
+                bestState = square
         
         return [bestState,bestChoice]
 
