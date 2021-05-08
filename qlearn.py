@@ -8,22 +8,23 @@ learnRate = 0.3
 
 goalReward = 100
 forbiddenReward = -100
-wallReward = -0.1
 
 epsilonGreedy = 0.5
-
-randSeed = 1
-
-convergenceVal = 100000
+random.seed(1)
 
 
 
 class Square:
-    def __init__(self, squareType,qVal,reward,index):
+    def __init__(self, squareType,reward,upQVal,rightQVal,downQVal,leftQVal,index):
         self.type = squareType
         self.reward = reward
-        self.qVal = qVal
+        self.upQVal = upQVal
+        self.rightQVal = rightQVal
+        self.downQVal = downQVal
+        self.leftQVal = leftQVal
         self.index = index
+    def __str__(self):
+        return f'{self.type}'
 
 
 boardArray = []
@@ -31,7 +32,8 @@ boardArray = []
 
 #Initialize the board to all Open with a reward of -0.1
 for i in range (1,17,1):
-    boardArray.append(Square('O',-0.1,0,i))
+    boardArray.append(Square('O',-0.1,0,0,0,0,i))
+
 
 
 #Taking in user input and preparing to extract info from it
@@ -68,19 +70,12 @@ boardArray[forbiddenStateLoc].reward = -100
 
 boardArray[wallStateLoc].type = 'W'
 
+#for i in range (0,16,1):
+#    print("index, type = ",boardArray[i].index, boardArray[i].type)
+
 # print("Set all starting states")
 # for i in range (0,16,1):
-#     print(boardArray[i].type, "+ ",boardArray[i].reward, boardArray[i].qVal,boardArray[i].index)
-
-
-def isTerminalState (square):
-    if square.reward == 100:
-        return True
-    elif square.reward == -100:
-        return True
-    else:
-        return False
-
+#     print(boardArray[i].type, "+ ",boardArray[i].reward, boardArray[i].qVal,boardArray[i].index
 
 
 #We need to limit certain squares, we can't go up for example on top row, store all edge cases
@@ -92,155 +87,189 @@ downBorder = {1,2,3,4}
 
 def chooseNextState(square,flag):
     #Initialize all values to very negative so we don't take those paths unless they're a possibility
-    upVal = -100000
-    downVal = -100000
-    leftVal = -100000
-    rightVal = -100000
+    # upVal = square.upQVal
+    # rightVal = square.rightQVal
+    # downVal = square.upQVal
+    # leftVal = square.leftQVal
+    
+    upVal = -1000
+    rightVal = -1000
+    downVal = -1000
+    leftVal = -1000
+
+    bestState = 1234
+    bestChoice = 5678
+
+
+
+
     #print("Square index is: ",square.index)
     if ((int)(square.index) in rightBorder):
         #print("entering rightBorder")
         if square.index in upBorder: #Square 16
             #print("entering square 16")
-            downVal = boardArray[square.index-1-4].qVal
-            leftVal = boardArray[square.index-1-1].qVal
+            downVal = square.downQVal
+            leftVal = square.leftQVal
         elif square.index in downBorder:#Square 4
             #print("entering square 4")
-            upVal = boardArray[square.index-1+4].qVal    
-            leftVal = boardArray[square.index-1-1].qVal
+            upVal = square.upQVal    
+            leftVal = square.leftQVal
         else:#Any square right NOT 16/4
-            #print("entering other squares")
-            #print("board length is:",len(boardArray))
-            upVal = boardArray[square.index-1+4].qVal    
-            downVal = boardArray[square.index-1-4].qVal
-            leftVal = boardArray[square.index-1-1].qVal
+            upVal = square.upQVal    
+            downVal = square.downQVal
+            leftVal = square.leftQVal
 
     if ((int)(square.index) in leftBorder):
         #print("entering leftBorder")
         if square.index in upBorder: #Square 13
             #print("entering square 13")
-            downVal = boardArray[square.index-1-4].qVal
-            rightVal = boardArray[square.index-1+1].qVal
+            downVal = square.downQVal
+            rightVal = square.rightQVal
         elif square.index in downBorder: #Square 1
             #print("entering square 1")
-            upVal = boardArray[square.index-1+4].qVal    
-            rightVal = boardArray[square.index-1+1].qVal
+            upVal = square.upQVal    
+            rightVal = square.rightQVal
         else:#Any square right NOT 13/1
             #print("entering other squares")
-            upVal = boardArray[square.index-1+4].qVal    
-            downVal = boardArray[square.index-1-4].qVal
-            rightVal = boardArray[square.index-1+1].qVal
+            upVal = square.upQVal    
+            downVal = square.downQVal
+            rightVal = square.rightQVal
 
     if ((int)(square.index) in upBorder):
         #print("entering upBorder")
         if square.index in rightBorder: #Square 16
-           # print("entering square 16")
-            downVal = boardArray[square.index-1-4].qVal
-            leftVal = boardArray[square.index-1-1].qVal
+        # print("entering square 16")
+            downVal = square.downQVal
+            leftVal = square.leftQVal
         elif square.index in leftBorder:#Square 13
             #print("entering square 13")
-            downVal = boardArray[square.index-1-4].qVal
-            rightVal = boardArray[square.index-1+1].qVal
+            downVal = square.downQVal
+            rightVal = square.rightQVal
         else:#Any square right NOT 16/13
             #print("entering other squares")
-            downVal = boardArray[square.index-1-4].qVal
-            rightVal = boardArray[square.index-1+1].qVal
-            leftVal = boardArray[square.index-1-1].qVal
+            downVal = square.downQVal
+            rightVal = square.rightQVal
+            leftVal = square.leftQVal
 
         
     if ((int)(square.index) in downBorder):
         #print("entering downBorder")
         if square.index in rightBorder: #Square 4
             #print("entering square4")
-            upVal = boardArray[square.index-1+4].qVal
-            leftVal = boardArray[square.index-1-1].qVal
+            upVal = square.upQVal
+            leftVal = square.leftQVal
         elif square.index in leftBorder:#Square 1
             #print("entering square1")
-            upVal = boardArray[square.index-1+4].qVal
-            rightVal = boardArray[square.index-1+1].qVal
+            upVal = square.upQVal
+            rightVal = square.rightQVal
         else:#Any square right NOT 4/1
             #print("entering other squares")
-            upVal = boardArray[square.index-1+4].qVal
-            rightVal = boardArray[square.index-1+1].qVal
-            leftVal = boardArray[square.index-1-1].qVal
+            upVal = square.upQVal
+            rightVal = square.rightQVal
+            leftVal = square.leftQVal
     
-    print("upVal, rightVal, downVal, leftVal = ", upVal, rightVal, downVal, leftVal)
+    # print("upVal, rightVal, downVal, leftVal = ", upVal, rightVal, downVal, leftVal)
     maxVal = max(upVal, rightVal, downVal, leftVal)
-    bestState = None 
 
     #stateWMove = []
-    bestChoice = 0
-    if maxVal==rightVal:
-        bestState = boardArray[square.index-1+1]
-        if bestState.type == "W":
-            bestState = boardArray[square.index-1]
-            bestChoice = "wall-square"
-        else:
-            bestChoice = "right"
-    elif maxVal==leftVal:
-        bestState = boardArray[square.index-1-1]
-        if bestState.type == "W":
-            bestState = boardArray[square.index-1]
-            bestChoice = "wall-square"
-        else:
-            bestChoice = "left"
-    elif maxVal==upVal:
+    if maxVal==upVal:
+        if (square.index-1+4) 
         bestState = boardArray[square.index-1+4]
-        if bestState.type == "W":
-            bestState = boardArray[square.index-1]
-            bestChoice = "wall-square"
-        else:
-            bestChoice = "up"
+        bestChoice = "up"
+        
+    elif maxVal==rightVal:
+        bestState = boardArray[square.index-1+1]
+        bestChoice = "right"
+
     elif maxVal==downVal:
         bestState = boardArray[square.index-1-4]
-        if bestState.type == "W":
-            bestState = boardArray[square.index-1]
-            bestChoice = "wall-square"
-        else:
-            bestChoice = "down"
+        bestChoice = "down"
+    
+    elif maxVal==leftVal:
+        bestState = boardArray[square.index-1-1]
+        bestChoice = "left"
 
-    if ((np.random.random() >= (1-epsilonGreedy)) or flag == 'optimal'):
+
+    randVal = random.random()
+    if ((randVal >= (1-epsilonGreedy)) or flag == 1):
         return [bestState,bestChoice]
 
     else:
+        #print("DOING RANDOM TINGSSSS")
         randInt = random.randint(0,3)
-        #print("randInt is = ", randInt)
-        if ((randInt == 0) and (rightVal > -10)):
+        if ((randInt == 0) and (rightVal > -999)):
+            # print("ENTERING RANDINT = 0")
             bestState = boardArray[square.index-1+1]
-            if bestState.type == "W":
-                bestState = boardArray[square.index-1]
-                bestChoice = "wall-square"
-            else:
-                bestChoice = "right"
-        elif ((randInt == 1) and (leftVal > -10)):
+            # if bestState.type == "W":
+            #     #bestState = boardArray[square.index-1]
+            #     bestChoice = "wall-square"
+            # else:
+            bestChoice = "right"
+        elif ((randInt == 1) and (leftVal > -999)):
+            # print("ENTERING RANDINT = 1")
             bestState = boardArray[square.index-1-1]
-            if bestState.type == "W":
-                bestState = boardArray[square.index-1]
-                bestChoice = "wall-square"
-            else:
-                bestChoice = "left"
-        elif ((randInt == 2) and (upVal > -10)):
+            # if bestState.type == "W":
+            #     #bestState = boardArray[square.index-1]
+            #     bestChoice = "wall-square"
+            # else:
+            bestChoice = "left"
+        elif ((randInt == 2) and (upVal > -999)):
+            # print("ENTERING RANDINT = 2")
             bestState = boardArray[square.index-1+4]
-            if bestState.type == "W":
-                bestState = boardArray[square.index-1]
-                bestChoice = "wall-square"
-            else:
-                bestChoice = "up"
-        elif ((randInt == 3) and (downVal > -10)):
+            # if bestState.type == "W":
+            #     #bestState = boardArray[square.index-1]
+            #     bestChoice = "wall-square"
+            # else:
+            bestChoice = "up"
+        elif ((randInt == 3) and (downVal > -999)):
+            # print("ENTERING RANDINT = 3")
             bestState = boardArray[square.index-1-4]
-            if bestState.type == "W":
-                bestState = boardArray[square.index-1]
-                bestChoice = "wall-square"
-            else:
-                bestChoice = "down"
+            # if bestState.type == "W":
+            #     #bestState = boardArray[square.index-1]
+            #     bestChoice = "wall-square"
+            # else:
+            bestChoice = "down"
+        
         return [bestState,bestChoice]
 
-
-def updateQVal (state):
+def updateQVal (state, flag):
     #print("current q val = ",state.qVal)
-    bestState = (chooseNextState(state,'optimal'))[0]
-    newQVal = bestState.qVal
-    tempQval = ((1-learnRate) * state.qVal) + learnRate*(state.reward + discountRate *newQVal)
-    state.qVal = tempQval
+    statePassedIn = state
+
+    nextStatePicked = (chooseNextState(state,flag))[0]
+    #print("NEXTSTATEPICKEDREWARD = ", nextStatePicked.reward)
+    #print("NEXTSTATEPICKEDTYPE = ", nextStatePicked.type)
+
+
+# print("NEXTSTATEPICKED IN UPDATEQVAL IS = ",nextStatePicked)
+    newStateUpQVal = nextStatePicked.upQVal
+    newStateRightQVal = nextStatePicked.rightQVal
+    newStateDownQVal = nextStatePicked.downQVal
+    newStateLeftQVal = nextStatePicked.leftQVal
+
+
+    maxQVal = max(newStateUpQVal,newStateRightQVal,newStateDownQVal,newStateLeftQVal)
+
+    updatedUpQVal = ((1-learnRate) * state.upQVal) + learnRate*(nextStatePicked.reward + discountRate * maxQVal)
+    updatedRightQVal = ((1-learnRate) * state.rightQVal) + learnRate*(nextStatePicked.reward + discountRate *maxQVal)
+    updatedDownQVal = ((1-learnRate) * state.downQVal) + learnRate*(nextStatePicked.reward + discountRate *maxQVal)
+    updatedLeftQVal = ((1-learnRate) * state.leftQVal) + learnRate*(nextStatePicked.reward + discountRate *maxQVal)
+
+    nextActionPicked = (chooseNextState(state,flag))[1]
+    if (nextActionPicked == "up"):
+        state.upQVal = updatedUpQVal
+    elif (nextActionPicked == "right"):
+        state.rightQVal = updatedRightQVal
+    elif (nextActionPicked == "down"):
+        state.downQVal = updatedDownQVal
+    elif (nextActionPicked == "left"):
+        state.leftQVal = updatedLeftQVal
+    
+    if (nextStatePicked.type == "W"):
+        #print("NEXTSTATEPICKED WAS WALL, REVERSE")
+        nextStatePicked = statePassedIn
+
+    return nextStatePicked
     # nextState = (chooseNextState(state,'doesntNeedOpt'))[0]
     # return nextState
 
@@ -255,22 +284,22 @@ def updateQVal (state):
 #While we're not at a goal state, iterate until we get there, updating the q-values of states along the way
 #Once we get to the goal state, break out, and repeat this process 100,000 times until all Q-values are updated
 #         
-atGoalState = False
-iterationCount = 100
+iterationCount = 100000
 startState = boardArray[1]
 atExitState = False
 for i in range (0,iterationCount,1):
-    print("in loop with i = ", i)
+    #print("in loop with i = ", i)
     currentState = startState
     atExitState = False
     while(not atExitState):
         if i == iterationCount:
             epsilonGreedy = 0
-        updateQVal(currentState)
-        currentState = (chooseNextState(state,'doesntNeedOpt'))[0] 
-        print("currentState is now, index", currentState.index)
+        
+        #currentState = (chooseNextState(currentState,'doesntNeedOpt'))[0] 
+        currentState = updateQVal(currentState, 0) 
+        #print("currentState is now, index", currentState.index)
         #print("currentState.type = :",currentState.type)
-        if (currentState.type == ('G' or 'F')):
+        if ((currentState.type == 'G') or (currentState.type ==  'F')):
             atExitState = True
 
 
@@ -280,39 +309,18 @@ pathArray = []
 pathStart = boardArray[0]
 currState = pathStart
 
-for i in range (0,16,1):
-    #print("not at goal state yet")
 
-    chosenState = (chooseNextState(currState,'optimal'))
-    pathArray.append(chosenState[1])
-    nextState = chosenState[0]
-    if (currState.type == ('G' or 'F')):
-            pathAtGoalState = True
-    #print("currState.index = :",currState.index)
-    #print("currState.type = :",currState.type)
-    currState = nextState
+optimalPolicy = [] #optimalPolicy = 16 long, contains the best action (highest q val) for each square
 
-pathArray[goalState1Loc] = 'goal'
-pathArray[goalState2Loc] = 'goal'
-pathArray[forbiddenStateLoc] = 'forbid'
-pathArray[wallStateLoc] = 'wall-square'
-# print("printing patharray")
-# print("pathArray  = ", pathArray)
-# print("length is = ", len(pathArray))
 for i in range(0,16,1):
-    print(i+1, pathArray[i])
+    chosenState = chooseNextState(boardArray[i],1)[1]
+    optimalPolicy.append(chosenState)
 
+optimalPolicy[goalState1Loc] = 'goal'
+optimalPolicy[goalState2Loc] = 'goal'
+optimalPolicy[forbiddenStateLoc] = 'forbid'
+optimalPolicy[wallStateLoc] = 'wall-square'
 
-
-
-
-
-
-
-
-
-#for i in range 1,17,1:
-#    print(i, " " ,bestChoicesArray[i])
-
-
-
+#print("PRINTING OPTIMAL POLICY")
+for i in range (1,17,1):
+    print(i, optimalPolicy[i-1])
