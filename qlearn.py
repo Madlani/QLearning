@@ -17,7 +17,6 @@ randSeed = 1
 convergenceVal = 100000
 
 
-bestChoicesArray = []
 
 class Square:
     def __init__(self, squareType,qVal,reward,index):
@@ -40,7 +39,7 @@ inputString = input ("Enter input-")
 inputAsArray = inputString.split(" ")
 inputAsArrayLen = len(inputAsArray)
 
-#Extracting relevant info from user input
+#Extracting relevant info from user input, subtracting 1 to account for indexes 
 goalState1Loc = int(inputAsArray[0])-1
 goalState2Loc = int(inputAsArray[1])-1
 forbiddenStateLoc = int(inputAsArray[2])-1
@@ -50,15 +49,13 @@ printQValuesIndex = 0
 
 #If our length is 6, then we have to print the Q values
 if (inputAsArrayLen == 6):
-    printQValuesIndex = inputAsArray[5]
+    printQValuesIndex = inputAsArray[5]-1
 
 
-#General values needed & Setting up the board with the user input
-startLoc = 2
+#General values needed & Setting up the board with the user input - start reward & wall reward remain -0.1
+startIndex = 1
 
-boardArray[startLoc].type = 'S'
-boardArray[startLoc].reward = 0
-
+boardArray[startIndex].type = 'S'
 
 boardArray[goalState1Loc].type = 'G'
 boardArray[goalState1Loc].reward = 100
@@ -70,7 +67,6 @@ boardArray[forbiddenStateLoc].type = 'F'
 boardArray[forbiddenStateLoc].reward = -100
 
 boardArray[wallStateLoc].type = 'W'
-
 
 # print("Set all starting states")
 # for i in range (0,16,1):
@@ -88,7 +84,6 @@ def isTerminalState (square):
 
 
 #We need to limit certain squares, we can't go up for example on top row, store all edge cases
-
 rightBorder = {16,12,8,4}
 leftBorder = {13,9,4,1}
 upBorder = {13,14,15,16}
@@ -167,6 +162,7 @@ def chooseNextState(square,flag):
             upVal = boardArray[square.index-1+4].qVal
             rightVal = boardArray[square.index-1+1].qVal
             leftVal = boardArray[square.index-1-1].qVal
+    
     print("upVal, rightVal, downVal, leftVal = ", upVal, rightVal, downVal, leftVal)
     maxVal = max(upVal, rightVal, downVal, leftVal)
     bestState = None 
@@ -176,28 +172,33 @@ def chooseNextState(square,flag):
     if maxVal==rightVal:
         bestState = boardArray[square.index-1+1]
         if bestState.type == "W":
-            bestState
+            bestState = boardArray[square.index-1]
+            bestChoice = "wall-square"
         else:
-            bestChoicesArray.append("right")
-       # stateWMove.append(bestState,"right")
-        bestChoice = "right"
+            bestChoice = "right"
     elif maxVal==leftVal:
         bestState = boardArray[square.index-1-1]
-        bestChoicesArray.append("left")
-        #stateWMove.append(bestState,"left")
-        bestChoice = "left"
+        if bestState.type == "W":
+            bestState = boardArray[square.index-1]
+            bestChoice = "wall-square"
+        else:
+            bestChoice = "left"
     elif maxVal==upVal:
         bestState = boardArray[square.index-1+4]
-        bestChoicesArray.append("up")
-        #stateWMove.append(bestState,"up")
-        bestChoice = "up"
+        if bestState.type == "W":
+            bestState = boardArray[square.index-1]
+            bestChoice = "wall-square"
+        else:
+            bestChoice = "up"
     elif maxVal==downVal:
         bestState = boardArray[square.index-1-4]
-        bestChoicesArray.append("down")
-        #stateWMove.append(bestState,"down")
-        bestChoice = "down"
+        if bestState.type == "W":
+            bestState = boardArray[square.index-1]
+            bestChoice = "wall-square"
+        else:
+            bestChoice = "down"
 
-    if ((np.random.random() >= epsilonGreedy) or flag == 'optimal'):
+    if ((np.random.random() >= (1-epsilonGreedy)) or flag == 'optimal'):
         return [bestState,bestChoice]
 
     else:
@@ -205,16 +206,32 @@ def chooseNextState(square,flag):
         #print("randInt is = ", randInt)
         if ((randInt == 0) and (rightVal > -10)):
             bestState = boardArray[square.index-1+1]
-            bestChoice = "right"
+            if bestState.type == "W":
+                bestState = boardArray[square.index-1]
+                bestChoice = "wall-square"
+            else:
+                bestChoice = "right"
         elif ((randInt == 1) and (leftVal > -10)):
             bestState = boardArray[square.index-1-1]
-            bestChoice = "left"
+            if bestState.type == "W":
+                bestState = boardArray[square.index-1]
+                bestChoice = "wall-square"
+            else:
+                bestChoice = "left"
         elif ((randInt == 2) and (upVal > -10)):
             bestState = boardArray[square.index-1+4]
-            bestChoice = "up"
+            if bestState.type == "W":
+                bestState = boardArray[square.index-1]
+                bestChoice = "wall-square"
+            else:
+                bestChoice = "up"
         elif ((randInt == 3) and (downVal > -10)):
             bestState = boardArray[square.index-1-4]
-            bestChoice = "down"
+            if bestState.type == "W":
+                bestState = boardArray[square.index-1]
+                bestChoice = "wall-square"
+            else:
+                bestChoice = "down"
         return [bestState,bestChoice]
 
 
@@ -224,8 +241,8 @@ def updateQVal (state):
     newQVal = bestState.qVal
     tempQval = ((1-learnRate) * state.qVal) + learnRate*(state.reward + discountRate *newQVal)
     state.qVal = tempQval
-    nextState = (chooseNextState(state,'doesntNeedOpt'))[0]
-    return nextState
+    # nextState = (chooseNextState(state,'doesntNeedOpt'))[0]
+    # return nextState
 
    # print("new q val = ",state.qVal)
 
@@ -239,16 +256,18 @@ def updateQVal (state):
 #Once we get to the goal state, break out, and repeat this process 100,000 times until all Q-values are updated
 #         
 atGoalState = False
-iterationCount = 100000
+iterationCount = 100
 startState = boardArray[1]
 atExitState = False
 for i in range (0,iterationCount,1):
+    print("in loop with i = ", i)
     currentState = startState
     atExitState = False
     while(not atExitState):
-        if iterationCount == 0:
+        if i == iterationCount:
             epsilonGreedy = 0
-        currentState = updateQVal(currentState) #currentState is updated here since updateQVal returns a state
+        updateQVal(currentState)
+        currentState = (chooseNextState(state,'doesntNeedOpt'))[0] 
         print("currentState is now, index", currentState.index)
         #print("currentState.type = :",currentState.type)
         if (currentState.type == ('G' or 'F')):
