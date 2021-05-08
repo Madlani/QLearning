@@ -28,33 +28,34 @@ class Square:
 
 
 boardArray = []
-#S = start, G = goal, F = forbidden, W = wall, O = ordinary
+#S = start, G = goal, F = forbidden, W = wall, O = open
 
-#Initialize the board to all Open with a reward of 
+#Initialize the board to all Open with a reward of -0.1
 for i in range (1,17,1):
     boardArray.append(Square('O',-0.1,0,i))
 
 
-# print("Initialize square indexes ")
-# for i in range (0,16,1):
-#     print(boardArray[i].index)
-
+#Taking in user input and preparing to extract info from it
 inputString = input ("Enter input-")
 inputAsArray = inputString.split(" ")
 inputAsArrayLen = len(inputAsArray)
 
-#print(inputAsArray)
-
+#Extracting relevant info from user input
 goalState1Loc = int(inputAsArray[0])-1
 goalState2Loc = int(inputAsArray[1])-1
 forbiddenStateLoc = int(inputAsArray[2])-1
 wallStateLoc = int(inputAsArray[3])-1
 outputFormat = inputAsArray[4]
+printQValuesIndex = 0
 
+#If our length is 6, then we have to print the Q values
 if (inputAsArrayLen == 6):
     printQValuesIndex = inputAsArray[5]
 
+
+#General values needed & Setting up the board with the user input
 startLoc = 2
+
 boardArray[startLoc].type = 'S'
 boardArray[startLoc].reward = 0
 
@@ -71,13 +72,9 @@ boardArray[forbiddenStateLoc].reward = -100
 boardArray[wallStateLoc].type = 'W'
 
 
-print("Set all starting states")
-for i in range (0,16,1):
-    print(boardArray[i].type, "+ ",boardArray[i].reward, boardArray[i].qVal,boardArray[i].index)
-
-
-#ef tiebreak(upval, rightval, downval, leftval):
-
+# print("Set all starting states")
+# for i in range (0,16,1):
+#     print(boardArray[i].type, "+ ",boardArray[i].reward, boardArray[i].qVal,boardArray[i].index)
 
 
 def isTerminalState (square):
@@ -88,15 +85,18 @@ def isTerminalState (square):
     else:
         return False
 
+
+
+#We need to limit certain squares, we can't go up for example on top row, store all edge cases
+
 rightBorder = {16,12,8,4}
 leftBorder = {13,9,4,1}
 upBorder = {13,14,15,16}
 downBorder = {1,2,3,4}
-#we need to limit certain squares,
-# #can't go up for example on top row,
-# 
+
 
 def chooseNextState(square,flag):
+    #Initialize all values to very negative so we don't take those paths unless they're a possibility
     upVal = -100000
     downVal = -100000
     leftVal = -100000
@@ -167,18 +167,7 @@ def chooseNextState(square,flag):
             upVal = boardArray[square.index-1+4].qVal
             rightVal = boardArray[square.index-1+1].qVal
             leftVal = boardArray[square.index-1-1].qVal
-    
-
-    # maxVal = None
-    # if rightVal != None:
-    #     if leftVal != None:
-    #         if upVal != None:
-    #             if downVal != None:
-    #                 maxVal = max(rightVal, leftVal, upVal, downVal)
-
-
-
-
+    print("upVal, rightVal, downVal, leftVal = ", upVal, rightVal, downVal, leftVal)
     maxVal = max(upVal, rightVal, downVal, leftVal)
     bestState = None 
 
@@ -186,7 +175,10 @@ def chooseNextState(square,flag):
     bestChoice = 0
     if maxVal==rightVal:
         bestState = boardArray[square.index-1+1]
-        bestChoicesArray.append("right")
+        if bestState.type == "W":
+            bestState
+        else:
+            bestChoicesArray.append("right")
        # stateWMove.append(bestState,"right")
         bestChoice = "right"
     elif maxVal==leftVal:
@@ -242,33 +234,36 @@ def updateQVal (state):
 #     for j in range (0,16,1):
 #         updateQVal(boardArray[j])
 
-    
+
+#While we're not at a goal state, iterate until we get there, updating the q-values of states along the way
+#Once we get to the goal state, break out, and repeat this process 100,000 times until all Q-values are updated
+#         
 atGoalState = False
-atExitState = False
-iterationCount = 10
+iterationCount = 100000
 startState = boardArray[1]
+atExitState = False
 for i in range (0,iterationCount,1):
     currentState = startState
+    atExitState = False
     while(not atExitState):
-        #print("line 246")
         if iterationCount == 0:
             epsilonGreedy = 0
-        currentState = updateQVal(currentState) #start updating from the starting square
+        currentState = updateQVal(currentState) #currentState is updated here since updateQVal returns a state
+        print("currentState is now, index", currentState.index)
         #print("currentState.type = :",currentState.type)
         if (currentState.type == ('G' or 'F')):
             atExitState = True
 
+
+
 pathAtGoalState = False
-
-
 pathArray = []
-
-
-
 pathStart = boardArray[0]
 currState = pathStart
+
 for i in range (0,16,1):
     #print("not at goal state yet")
+
     chosenState = (chooseNextState(currState,'optimal'))
     pathArray.append(chosenState[1])
     nextState = chosenState[0]
