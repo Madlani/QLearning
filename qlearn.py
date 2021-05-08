@@ -84,6 +84,92 @@ leftBorder = {13,9,4,1}
 upBorder = {13,14,15,16}
 downBorder = {1,2,3,4}
 
+def isValidMove(square, action):
+    if ((int)(square.index) in rightBorder):
+    #print("entering rightBorder")
+        if square.index in upBorder: #Square 16
+            if ((action == "up") or (action == "right")):
+                return False
+        elif square.index in downBorder:#Square 4
+            if ((action == "down") or (action == "right")):
+                return False
+        else:#Any square right NOT 16/4
+            if (action == "right"):
+                return False
+            else:
+                return True
+
+    if ((int)(square.index) in leftBorder):
+        #print("entering leftBorder")
+        if square.index in upBorder: #Square 13
+            if ((action == "up") or (action == "left")):
+                return False
+        elif square.index in downBorder: #Square 1
+            if ((action == "down") or (action == "left")):
+                return False
+        else:#Any square right NOT 13/1
+            if (action == "left"):
+                return False
+            else:
+                return True
+
+    if ((int)(square.index) in upBorder):
+        #print("entering upBorder")
+        if square.index in rightBorder: #Square 16
+            if ((action == "up") or (action == "right")):
+                return False
+        elif square.index in leftBorder:#Square 13
+            if ((action == "up") or (action == "left")):
+                return False
+        else:#Any square right NOT 16/13
+            if (action == "up"):
+                return False
+            else:
+                return True
+
+        
+    if ((int)(square.index) in downBorder):
+        #print("entering downBorder")
+        if square.index in rightBorder: #Square 4
+            if ((action == "down") or (action == "right")):
+                return False
+        elif square.index in leftBorder:#Square 1
+            if ((action == "down") or (action == "left")):
+                return False
+        else:#Any square right NOT 4/1
+            if (action == "down"):
+                return False
+            else:
+                return True
+
+#If we have a square that tries to make an illegal move outside of border, calculate the Q-value for that square using itself
+def calcQValWithSelf(square, action):
+
+    stateUpQVal = square.upQVal
+    stateRightQVal = square.rightQVal
+    stateDownQVal = square.downQVal
+    stateLeftQVal = square.leftQVal
+
+
+
+    maxQVal = max(stateUpQVal,stateRightQVal,stateDownQVal,stateLeftQVal)
+
+    updatedUpQVal = ((1-learnRate) * state.upQVal) + learnRate*(state.reward + discountRate * maxQVal)
+    updatedRightQVal = ((1-learnRate) * state.rightQVal) + learnRate*(state.reward + discountRate *maxQVal)
+    updatedDownQVal = ((1-learnRate) * state.downQVal) + learnRate*(state.reward + discountRate *maxQVal)
+    updatedLeftQVal = ((1-learnRate) * state.leftQVal) + learnRate*(state.reward + discountRate *maxQVal)
+
+    nextActionPicked = action
+    if (nextActionPicked == "up"):
+        state.upQVal = updatedUpQVal
+    elif (nextActionPicked == "right"):
+        state.rightQVal = updatedRightQVal
+    elif (nextActionPicked == "down"):
+        state.downQVal = updatedDownQVal
+    elif (nextActionPicked == "left"):
+        state.leftQVal = updatedLeftQVal
+    
+
 
 def chooseNextState(square,flag):
     #Initialize all values to very negative so we don't take those paths unless they're a possibility
@@ -100,94 +186,106 @@ def chooseNextState(square,flag):
     bestState = 1234
     bestChoice = 5678
 
+    squareUpVal = square.upQVal
+    squareRightVal = square.rightQVal
+    squareDownVal = square.downQVal
+    squareLeftVal = square.leftQVal
 
 
 
-    #print("Square index is: ",square.index)
-    if ((int)(square.index) in rightBorder):
-        #print("entering rightBorder")
-        if square.index in upBorder: #Square 16
-            #print("entering square 16")
-            downVal = square.downQVal
-            leftVal = square.leftQVal
-        elif square.index in downBorder:#Square 4
-            #print("entering square 4")
-            upVal = square.upQVal    
-            leftVal = square.leftQVal
-        else:#Any square right NOT 16/4
-            upVal = square.upQVal    
-            downVal = square.downQVal
-            leftVal = square.leftQVal
 
-    if ((int)(square.index) in leftBorder):
-        #print("entering leftBorder")
-        if square.index in upBorder: #Square 13
-            #print("entering square 13")
-            downVal = square.downQVal
-            rightVal = square.rightQVal
-        elif square.index in downBorder: #Square 1
-            #print("entering square 1")
-            upVal = square.upQVal    
-            rightVal = square.rightQVal
-        else:#Any square right NOT 13/1
-            #print("entering other squares")
-            upVal = square.upQVal    
-            downVal = square.downQVal
-            rightVal = square.rightQVal
 
-    if ((int)(square.index) in upBorder):
-        #print("entering upBorder")
-        if square.index in rightBorder: #Square 16
-        # print("entering square 16")
-            downVal = square.downQVal
-            leftVal = square.leftQVal
-        elif square.index in leftBorder:#Square 13
-            #print("entering square 13")
-            downVal = square.downQVal
-            rightVal = square.rightQVal
-        else:#Any square right NOT 16/13
-            #print("entering other squares")
-            downVal = square.downQVal
-            rightVal = square.rightQVal
-            leftVal = square.leftQVal
+    # #print("Square index is: ",square.index)
+    # if ((int)(square.index) in rightBorder):
+    #     #print("entering rightBorder")
+    #     if square.index in upBorder: #Square 16
+    #         #print("entering square 16")
+    #         downVal = square.downQVal
+    #         leftVal = square.leftQVal
+    #     elif square.index in downBorder:#Square 4
+    #         #print("entering square 4")
+    #         upVal = square.upQVal    
+    #         leftVal = square.leftQVal
+    #     else:#Any square right NOT 16/4
+    #         upVal = square.upQVal    
+    #         downVal = square.downQVal
+    #         leftVal = square.leftQVal
+
+    # if ((int)(square.index) in leftBorder):
+    #     #print("entering leftBorder")
+    #     if square.index in upBorder: #Square 13
+    #         #print("entering square 13")
+    #         downVal = square.downQVal
+    #         rightVal = square.rightQVal
+    #     elif square.index in downBorder: #Square 1
+    #         #print("entering square 1")
+    #         upVal = square.upQVal    
+    #         rightVal = square.rightQVal
+    #     else:#Any square right NOT 13/1
+    #         #print("entering other squares")
+    #         upVal = square.upQVal    
+    #         downVal = square.downQVal
+    #         rightVal = square.rightQVal
+
+    # if ((int)(square.index) in upBorder):
+    #     #print("entering upBorder")
+    #     if square.index in rightBorder: #Square 16
+    #     # print("entering square 16")
+    #         downVal = square.downQVal
+    #         leftVal = square.leftQVal
+    #     elif square.index in leftBorder:#Square 13
+    #         #print("entering square 13")
+    #         downVal = square.downQVal
+    #         rightVal = square.rightQVal
+    #     else:#Any square right NOT 16/13
+    #         #print("entering other squares")
+    #         downVal = square.downQVal
+    #         rightVal = square.rightQVal
+    #         leftVal = square.leftQVal
 
         
-    if ((int)(square.index) in downBorder):
-        #print("entering downBorder")
-        if square.index in rightBorder: #Square 4
-            #print("entering square4")
-            upVal = square.upQVal
-            leftVal = square.leftQVal
-        elif square.index in leftBorder:#Square 1
-            #print("entering square1")
-            upVal = square.upQVal
-            rightVal = square.rightQVal
-        else:#Any square right NOT 4/1
-            #print("entering other squares")
-            upVal = square.upQVal
-            rightVal = square.rightQVal
-            leftVal = square.leftQVal
+    # if ((int)(square.index) in downBorder):
+    #     #print("entering downBorder")
+    #     if square.index in rightBorder: #Square 4
+    #         upVal = square.upQVal
+    #         leftVal = square.leftQVal
+    #     elif square.index in leftBorder:#Square 1
+    #         upVal = square.upQVal
+    #         rightVal = square.rightQVal
+    #     else:#Any square right NOT 4/1
+    #         upVal = square.upQVal
+    #         rightVal = square.rightQVal
+    #         leftVal = square.leftQVal
     
-    # print("upVal, rightVal, downVal, leftVal = ", upVal, rightVal, downVal, leftVal)
     maxVal = max(upVal, rightVal, downVal, leftVal)
 
-    #stateWMove = []
     if maxVal==upVal:
-        if (square.index-1+4) 
-        bestState = boardArray[square.index-1+4]
-        bestChoice = "up"
-        
+        if isValidMove(square, "up"):
+            bestState = boardArray[square.index-1+4]
+            bestChoice = "up"
+        else:
+            calcQValWithSelf(square, "up")
+
     elif maxVal==rightVal:
-        bestState = boardArray[square.index-1+1]
-        bestChoice = "right"
+        if isValidMove(square, "right"):
+            bestState = boardArray[square.index-1+1]
+            bestChoice = "right"
+        else:
+            calcQValWithSelf(square, "right")
 
     elif maxVal==downVal:
-        bestState = boardArray[square.index-1-4]
-        bestChoice = "down"
-    
+        if isValidMove(square, "down"):
+            bestState = boardArray[square.index-1-4]
+            bestChoice = "down"
+        else:
+            calcQValWithSelf(square, "down")
+
     elif maxVal==leftVal:
-        bestState = boardArray[square.index-1-1]
-        bestChoice = "left"
+        if isValidMove(square, "left"):
+            bestState = boardArray[square.index-1-1]
+            bestChoice = "left"
+        else:
+            calcQValWithSelf(square, "left")
 
 
     randVal = random.random()
